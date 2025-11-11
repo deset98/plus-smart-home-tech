@@ -6,7 +6,7 @@ import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.model.hub.*;
 
 @Component
-public class HubEventMapper {
+public class HubEventMapperAvro {
 
     public static SpecificRecordBase toAvro(HubEvent hubEvent) {
 

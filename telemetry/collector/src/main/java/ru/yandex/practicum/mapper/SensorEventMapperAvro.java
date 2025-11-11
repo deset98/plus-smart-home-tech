@@ -3,12 +3,11 @@ package ru.yandex.practicum.mapper;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.*;
 import ru.yandex.practicum.model.sensor.*;
-import ru.yandex.practicum.model.sensor.SensorEvent;
 
 import java.time.ZoneId;
 
 @Component
-public class SensorEventMapper {
+public class SensorEventMapperAvro {
     public static SensorEventAvro toAvro(SensorEvent sensorEvent) {
 
         SensorEventAvro.Builder builder = SensorEventAvro.newBuilder()

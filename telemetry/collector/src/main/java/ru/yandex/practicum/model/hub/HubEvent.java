@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import ru.yandex.practicum.model.hub.enums.HubEventType;
 
 import java.time.Instant;
@@ -22,6 +23,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @ToString
+@SuperBuilder
 public abstract class HubEvent {
 
     @NotBlank
