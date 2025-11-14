@@ -18,7 +18,6 @@ import java.util.List;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class AggregationStarter {
 
     private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
@@ -31,6 +30,15 @@ public class AggregationStarter {
     private final KafkaProducer<String, SensorsSnapshotAvro> kafkaProducer;
     private final KafkaConsumer<String, SensorEventAvro> kafkaConsumer;
     private final SnapshotService snapshotService;
+
+    public AggregationStarter(
+            KafkaProducer<String, SensorsSnapshotAvro> kafkaProducer,
+            KafkaConsumer<String, SensorEventAvro> kafkaConsumer,
+            SnapshotService snapshotService) {
+        this.kafkaProducer = kafkaProducer;
+        this.kafkaConsumer = kafkaConsumer;
+        this.snapshotService = snapshotService;
+    }
 
     public void start() {
         Runtime.getRuntime().addShutdownHook(new Thread(kafkaConsumer::wakeup));

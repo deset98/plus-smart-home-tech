@@ -21,8 +21,6 @@ import static org.apache.kafka.clients.producer.ProducerConfig.*;
 
 @Configuration
 public class AggregatorConfig {
-    private KafkaProducer<String, SensorsSnapshotAvro> kafkaProducer;
-    private KafkaConsumer<String, SensorEventAvro> kafkaConsumer;
 
     @Value("${kafka.bootstrap-server}")
     private String bootStrapServer;
@@ -31,27 +29,20 @@ public class AggregatorConfig {
 
     @Bean
     public KafkaProducer<String, SensorsSnapshotAvro> getProducer() {
-        if (kafkaProducer == null) {
-            Properties config = new Properties();
-            config.put(BOOTSTRAP_SERVERS_CONFIG, bootStrapServer);
-            config.put(GROUP_ID_CONFIG, groupId);
-            config.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-            config.put(VALUE_DESERIALIZER_CLASS_CONFIG, SensorEventDeserializer.class.getName());
-            kafkaConsumer = new KafkaConsumer<>(config);
-        }
-        return kafkaProducer;
+        Properties properties = new Properties();
+        properties.put(BOOTSTRAP_SERVERS_CONFIG, bootStrapServer);
+        properties.put(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        properties.put(VALUE_SERIALIZER_CLASS_CONFIG, AvroSerializer.class.getName());
+        return new KafkaProducer<>(properties);
     }
 
     @Bean
     public KafkaConsumer<String, SensorEventAvro> getConsumer() {
-        if (kafkaConsumer == null) {
-            Properties config = new Properties();
-            config.put(BOOTSTRAP_SERVERS_CONFIG, bootStrapServer);
-            config.put(KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-            config.put(VALUE_SERIALIZER_CLASS_CONFIG, AvroSerializer.class.getName());
-            kafkaProducer = new KafkaProducer<>(config);
-        }
-        return kafkaConsumer;
+        Properties properties = new Properties();
+        properties.put(BOOTSTRAP_SERVERS_CONFIG, bootStrapServer);
+        properties.put(GROUP_ID_CONFIG, groupId);
+        properties.put(KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(VALUE_DESERIALIZER_CLASS_CONFIG, SensorEventDeserializer.class.getName());
+        return new KafkaConsumer<>(properties);
     }
-
 }
