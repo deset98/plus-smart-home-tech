@@ -98,6 +98,7 @@ public class HubEventProcessor implements Runnable {
     }
 
     private void handleEvent(String hubId, ScenarioAddedEventAvro scenarioAddedEvent) {
+        log.warn("SNAPSHOT hubId={}", hubId);
         Scenario scenario = scenarioRepository.findByHubIdAndName(hubId, scenarioAddedEvent.getName())
                 .orElseGet(() -> Scenario.builder()
                         .hubId(hubId)
@@ -134,17 +135,20 @@ public class HubEventProcessor implements Runnable {
 
         conditionRepository.saveAll(scenario.getConditions().values());
         actionRepository.saveAll(scenario.getActions().values());
+
+        log.warn("SNAPSHOT hubId={}", scenario.getHubId());
         scenarioRepository.save(scenario);
     }
 
-    private void handleEvent(String hubId, ScenarioRemovedEventAvro sr) {
-        scenarioRepository.findByHubIdAndName(hubId, sr.getName())
+    private void handleEvent(String hubId, ScenarioRemovedEventAvro scenarioRemoved) {
+        log.warn("SNAPSHOT hubId={}", hubId);
+        scenarioRepository.findByHubIdAndName(hubId, scenarioRemoved.getName())
                 .ifPresent(scenario -> {
                     conditionRepository.deleteAll(scenario.getConditions().values());
                     actionRepository.deleteAll(scenario.getActions().values());
                     scenarioRepository.delete(scenario);
                 });
-        log.info("Scenario removed: hub={}, name={}", hubId, sr.getName());
+        log.info("Scenario removed: hub={}, name={}", hubId, scenarioRemoved.getName());
     }
 
     private Integer convertValue(Object value) {

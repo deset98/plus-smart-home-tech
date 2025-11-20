@@ -35,6 +35,7 @@ public class ScenarioService {
     private HubRouterControllerGrpc.HubRouterControllerBlockingStub hubRouterClient;
 
     public void processSnapshot(SensorsSnapshotAvro sensorsSnapshot) {
+        log.warn("SNAPSHOT hubId={}", sensorsSnapshot.getHubId());
         List<Scenario> scenarios = scenarioRepository.findByHubId(sensorsSnapshot.getHubId());
         if (scenarios.isEmpty()) {
             return;
@@ -69,13 +70,13 @@ public class ScenarioService {
                 default -> false;
             };
             case LightSensorAvro data ->
-                    type == LUMINOSITY && this.check(operation, data.getLuminosity(), condition.getValue());
+                    type.equals(LUMINOSITY) && this.check(operation, data.getLuminosity(), condition.getValue());
             case MotionSensorAvro data ->
-                    type == MOTION && this.check(operation, data.getMotion() ? 1 : 0, condition.getValue());
+                    type.equals(MOTION) && this.check(operation, data.getMotion() ? 1 : 0, condition.getValue());
             case TemperatureSensorAvro data ->
-                    type == TEMPERATURE && this.check(operation, data.getTemperatureC(), condition.getValue());
+                    type.equals(TEMPERATURE) && this.check(operation, data.getTemperatureC(), condition.getValue());
             case SwitchSensorAvro data ->
-                    type == SWITCH && this.check(operation, data.getState() ? 1 : 0, condition.getValue());
+                    type.equals(SWITCH) && this.check(operation, data.getState() ? 1 : 0, condition.getValue());
             default -> false;
         };
     }
@@ -92,7 +93,7 @@ public class ScenarioService {
 
 
     private void performActions(Scenario scenario) {
-        log.debug("Сработал сценарий [{}] для хаба [{}]. Выполняю действия.", scenario.getName(), scenario.getHubId());
+        log.debug("Starting actions Scenario {}, Hub {}", scenario.getName(), scenario.getHubId());
 
         for (Map.Entry<String, Action> actions : scenario.getActions().entrySet()) {
             Action action = actions.getValue();
@@ -115,9 +116,9 @@ public class ScenarioService {
                         .setTimestamp(timestamp)
                         .build()
                 );
-            } catch (Exception e) {
-                log.error("Ошибка при отправке действия [{}] для хаба [{}] для устройства [{}]",
-                        action.getType().name(), scenario.getHubId(), action.getId(), e);
+            } catch (Exception ex) {
+                log.error("Exception with Action {}, Hub {}, Device {}",
+                        action.getType().name(), scenario.getHubId(), action.getId(), ex);
             }
         }
     }
