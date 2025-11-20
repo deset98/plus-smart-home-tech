@@ -1,8 +1,7 @@
 package ru.yandex.practicum.dal.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.yandex.practicum.dal.model.enums.ConditionOperation;
 import ru.yandex.practicum.dal.model.enums.ConditionType;
 
@@ -10,6 +9,9 @@ import ru.yandex.practicum.dal.model.enums.ConditionType;
 @Table(name = "conditions")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Condition {
 
     @Id

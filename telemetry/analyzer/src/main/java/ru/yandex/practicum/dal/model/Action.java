@@ -1,14 +1,16 @@
 package ru.yandex.practicum.dal.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.yandex.practicum.dal.model.enums.ActionType;
 
 @Entity
 @Table(name = "actions")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Action {
 
     @Id
