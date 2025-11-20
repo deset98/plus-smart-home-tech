@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dal.model.Action;
 import ru.yandex.practicum.dal.model.Condition;
 import ru.yandex.practicum.dal.model.Scenario;
@@ -34,6 +35,7 @@ public class ScenarioService {
     @GrpcClient("hub-router")
     private HubRouterControllerGrpc.HubRouterControllerBlockingStub hubRouterClient;
 
+    @Transactional
     public void processSnapshot(SensorsSnapshotAvro sensorsSnapshot) {
         log.warn("SNAPSHOT hubId={}", sensorsSnapshot.getHubId());
         List<Scenario> scenarios = scenarioRepository.findByHubId(sensorsSnapshot.getHubId());
