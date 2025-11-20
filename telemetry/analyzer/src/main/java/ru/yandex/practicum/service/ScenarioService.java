@@ -68,14 +68,14 @@ public class ScenarioService {
                 case HUMIDITY -> this.check(operation, data.getHumidity(), condition.getValue());
                 default -> false;
             };
-            case LightSensorAvro data -> type ==
-                    LUMINOSITY && this.check(operation, data.getLuminosity(), condition.getValue());
-            case MotionSensorAvro data -> type ==
-                    MOTION && this.check(operation, data.getMotion() ? 1 : 0, condition.getValue());
-            case TemperatureSensorAvro data -> type ==
-                    TEMPERATURE && this.check(operation, data.getTemperatureC(), condition.getValue());
-            case SwitchSensorAvro data -> type ==
-                    SWITCH && this.check(operation, data.getState() ? 1 : 0, condition.getValue());
+            case LightSensorAvro data ->
+                    type == LUMINOSITY && this.check(operation, data.getLuminosity(), condition.getValue());
+            case MotionSensorAvro data ->
+                    type == MOTION && this.check(operation, data.getMotion() ? 1 : 0, condition.getValue());
+            case TemperatureSensorAvro data ->
+                    type == TEMPERATURE && this.check(operation, data.getTemperatureC(), condition.getValue());
+            case SwitchSensorAvro data ->
+                    type == SWITCH && this.check(operation, data.getState() ? 1 : 0, condition.getValue());
             default -> false;
         };
     }

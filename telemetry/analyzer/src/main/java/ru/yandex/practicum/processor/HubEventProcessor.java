@@ -65,7 +65,7 @@ public class HubEventProcessor implements Runnable {
     }
 
     private void processEvent(HubEventAvro hubEvent) {
-        if (hubEvent == null || hubEvent.getPayload() == null) {
+        if (hubEvent == null || hubEvent.getPayload() == null || hubEvent.getHubId() == null) {
             return;
         }
 
