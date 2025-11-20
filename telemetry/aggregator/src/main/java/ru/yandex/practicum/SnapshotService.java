@@ -14,13 +14,13 @@ public class SnapshotService {
     private final Map<String, SensorsSnapshotAvro> snapshotAvroMap = new HashMap<>();
 
     Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
-        SensorsSnapshotAvro snapshot =
-                snapshotAvroMap.getOrDefault(event.getHubId(),
-                        SensorsSnapshotAvro.newBuilder()
-                                .setHubId(event.getHubId())
-                                .setTimestamp(event.getTimestamp())
-                                .setSensorsState(new HashMap<>())
-                                .build());
+        SensorsSnapshotAvro snapshot = snapshotAvroMap.computeIfAbsent(event.getHubId(), hubId ->
+                SensorsSnapshotAvro.newBuilder()
+                        .setHubId(hubId)
+                        .setTimestamp(event.getTimestamp())
+                        .setSensorsState(new HashMap<>())
+                        .build()
+        );
 
         Map<String, SensorStateAvro> sensorsState = snapshot.getSensorsState();
         SensorStateAvro oldState = sensorsState.get(event.getId());
@@ -36,7 +36,6 @@ public class SnapshotService {
                 .setData(event.getPayload())
                 .build();
         sensorsState.put(event.getId(), newState);
-        snapshotAvroMap.put(event.getHubId(), snapshot);
         snapshot.setTimestamp(newState.getTimestamp());
         return Optional.of(snapshot);
     }
