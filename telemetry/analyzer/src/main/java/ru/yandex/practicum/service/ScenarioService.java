@@ -128,6 +128,6 @@ public class ScenarioService {
                 return value;
             }
         }
-        throw new IllegalArgumentException("Unknown ActionType: " + avro);
+        return null;
     }
 }

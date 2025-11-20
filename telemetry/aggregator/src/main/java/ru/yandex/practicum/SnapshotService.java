@@ -22,21 +22,22 @@ public class SnapshotService {
                                 .setSensorsState(new HashMap<>())
                                 .build());
 
-        SensorStateAvro oldState = snapshot.getSensorsState().get(event.getId());
+        Map<String, SensorStateAvro> sensorsState = snapshot.getSensorsState();
+        SensorStateAvro oldState = sensorsState.get(event.getId());
         if (oldState != null &&
-                (oldState.getTimestamp().isAfter(event.getTimestamp()) ||
-                        oldState.getData().equals(event.getPayload()))) {
+                (oldState.getData().equals(event.getPayload()) ||
+                        oldState.getTimestamp().isAfter(event.getTimestamp()))) {
             return Optional.empty();
         }
 
         SensorStateAvro newState =
                 SensorStateAvro.newBuilder()
-                        .setTimestamp(event.getTimestamp())
-                        .setData(event.getPayload())
-                        .build();
-        snapshot.getSensorsState().put(event.getId(), newState);
-        snapshot.setTimestamp(event.getTimestamp());
+                .setTimestamp(event.getTimestamp())
+                .setData(event.getPayload())
+                .build();
+        sensorsState.put(event.getId(), newState);
         snapshotAvroMap.put(event.getHubId(), snapshot);
+        snapshot.setTimestamp(newState.getTimestamp());
         return Optional.of(snapshot);
     }
 }
