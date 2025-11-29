@@ -1,6 +1,5 @@
 package ru.yandex.practicum;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -48,8 +47,7 @@ public class AggregationStarter {
                 ConsumerRecords<String, SensorEventAvro> records = kafkaConsumer.poll(CONSUME_ATTEMPT_TIMEOUT);
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     snapshotService.updateState(record.value())
-                            .ifPresent(snapshotAvro ->
-                                    kafkaProducer.send(new ProducerRecord<>(snapshotsTopic, snapshotAvro)));
+                            .ifPresent(snapshot -> kafkaProducer.send(new ProducerRecord<>(snapshotsTopic, snapshot)));
                 }
                 kafkaConsumer.commitSync();
             }
