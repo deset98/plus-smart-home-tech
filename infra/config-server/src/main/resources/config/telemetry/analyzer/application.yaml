@@ -35,3 +35,10 @@ app:
     snapshots-group-id: analyzer-snapshots
     hubs-group-id: analyzer-hubs
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 0
