@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import ru.yandex.practicum.model.sensor.enums.SensorEventType;
 
 import java.time.Instant;
@@ -22,7 +24,9 @@ import java.time.Instant;
         @JsonSubTypes.Type(value = TemperatureSensorEvent.class, name = "TEMPERATURE_SENSOR_EVENT")})
 @Getter
 @Setter
-@ToString
+@ToString(callSuper = true)
+@EqualsAndHashCode
+@SuperBuilder
 public abstract class SensorEvent {
 
     @NotBlank

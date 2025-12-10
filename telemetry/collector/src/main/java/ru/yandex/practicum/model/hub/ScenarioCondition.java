@@ -1,14 +1,14 @@
 package ru.yandex.practicum.model.hub;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.yandex.practicum.model.hub.enums.ConditionOperation;
 import ru.yandex.practicum.model.hub.enums.ConditionType;
 
 @Getter
 @Setter
 @ToString
+@EqualsAndHashCode
+@Builder
 public class ScenarioCondition {
 
     private String sensorId;

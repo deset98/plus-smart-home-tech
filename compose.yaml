@@ -33,3 +33,59 @@ services:
                              --partitions 1 --replication-factor 1 --if-not-exists \
                              --bootstrap-server kafka:29092'"
     init: true
+
+  smart-home-database:
+    image: postgres:16.1
+    container_name: smart-home-database
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sh
+
+  shopping-store-database:
+    image: postgres:16.1
+    container_name: shopping-store-database
+    ports:
+      - "7432:5432"
+    environment:
+      - POSTGRES_DB=shopping-store-database
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  shopping-cart-database:
+    image: postgres:16.1
+    container_name: shopping-cart-database
+    ports:
+      - "8432:5432"
+    environment:
+      - POSTGRES_DB=shopping-cart-database
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+  warehouse-database:
+    image: postgres:16.1
+    container_name: warehouse-database
+    ports:
+      - "9432:5432"
+    environment:
+      - POSTGRES_DB=warehouse-database
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
