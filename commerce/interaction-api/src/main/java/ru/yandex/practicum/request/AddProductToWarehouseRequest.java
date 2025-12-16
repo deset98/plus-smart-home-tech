@@ -11,6 +11,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AddProductToWarehouseRequest {
 
     @NotNull
@@ -18,5 +19,5 @@ public class AddProductToWarehouseRequest {
 
     @Min(1)
     @NotNull
-    private Integer quantity;
+    private Long quantity;
 }

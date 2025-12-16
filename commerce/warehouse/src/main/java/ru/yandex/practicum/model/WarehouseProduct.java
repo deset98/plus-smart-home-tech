@@ -49,6 +49,4 @@ public class WarehouseProduct {
 
     @PositiveOrZero
     private Long quantity;
-
-
 }
