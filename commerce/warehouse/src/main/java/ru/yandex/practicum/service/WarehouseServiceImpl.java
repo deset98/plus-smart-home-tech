@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service;
 
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,10 +14,14 @@ import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.mapper.WarehouseMapper;
 import ru.yandex.practicum.model.Address;
+import ru.yandex.practicum.model.OrderBooking;
 import ru.yandex.practicum.model.WarehouseProduct;
+import ru.yandex.practicum.repository.BookingRepository;
 import ru.yandex.practicum.repository.WarehouseRepository;
 import ru.yandex.practicum.request.AddProductToWarehouseRequest;
+import ru.yandex.practicum.request.AssemblyProductsForOrderRequest;
 import ru.yandex.practicum.request.NewProductInWarehouseRequest;
+import ru.yandex.practicum.request.ShippedToDeliveryRequest;
 
 import java.util.Map;
 import java.util.UUID;
@@ -30,7 +35,8 @@ import java.util.stream.Collectors;
 public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
-    private final WarehouseMapper WarehouseMapper;
+    private final WarehouseMapper warehouseMapper;
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional
@@ -39,7 +45,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             throw new SpecifiedProductAlreadyInWarehouseException("На складе уже есть Product с id",
                     request.getProductId());
         }
-        warehouseRepository.save(WarehouseMapper.toEntity(request));
+        warehouseRepository.save(warehouseMapper.toEntity(request));
     }
 
     @Override
@@ -121,5 +127,95 @@ public class WarehouseServiceImpl implements WarehouseService {
                         warehouseProduct.getProductId());
             }
         }
+    }
+
+    @Override
+    public void shippedToDelivery(ShippedToDeliveryRequest request) {
+        log.info("Передача товаров в доставку: {}", request);
+
+        UUID orderId = request.getOrderId();
+        OrderBooking booking = bookingRepository.findBookingByOrderId(orderId)
+                .orElseThrow(() -> new NotFoundException("Бронь не найдена."));
+
+        booking.setDeliveryId(request.getDeliveryId());
+        bookingRepository.save(booking);
+    }
+
+
+    @Override
+    public void acceptReturn(Map<UUID, Long> products) {
+        log.info("Возврат товаров на склад, список: {}", products);
+
+        products.forEach((id, quantity) -> {
+            if (quantity == null || quantity <= 0) {
+                throw new IllegalArgumentException("Некорректное количество товара " + id + ": " + quantity);
+            }
+
+            addProductToWarehouse(
+                    AddProductToWarehouseRequest.builder()
+                            .productId(id)
+                            .quantity(quantity)
+                            .build()
+            );
+        });
+    }
+
+    @Override
+    @Transactional
+    public BookedProductsDto assemblyProductsForOrder(AssemblyProductsForOrderRequest request) {
+        log.info("сбор товаров к заказу, request: {}", request);
+
+        UUID orderId = request.getOrderId();
+        Map<UUID, Long> productsForBooking = request.getProducts();
+
+        double totalWeight = 0.0;
+        double totalVolume = 0.0;
+        boolean fragile = false;
+
+        Map<UUID, WarehouseProduct> products = warehouseRepository
+                .findAllById(productsForBooking.keySet())
+                .stream()
+                .collect(Collectors.toMap(WarehouseProduct::getProductId, Function.identity()));
+
+        for (Map.Entry<UUID, Long> entry : productsForBooking.entrySet()) {
+            UUID id = entry.getKey();
+            long quantity = entry.getValue();
+
+            WarehouseProduct product = products.get(id);
+            if (product == null) {
+                throw new NoSpecifiedProductInWarehouseException("Товар не найден на складе", id);
+            }
+
+            if (quantity <= 0) {
+                throw new IllegalArgumentException("Некорректное количество товара " + id + ": " + quantity);
+            }
+
+            if (quantity > product.getQuantity()) {
+                throw new ProductInShoppingCartLowQuantityInWarehouse("Недостаточно товара %s на складе", id);
+            }
+
+            product.setQuantity(product.getQuantity() - quantity);
+            var dim = product.getDimension();
+            double productVolume = dim.getHeight() * dim.getDepth() * dim.getWidth();
+
+            totalVolume += productVolume * quantity;
+            totalWeight += product.getWeight() * quantity;
+
+            if (Boolean.TRUE.equals(product.getFragile())) {
+                fragile = true;
+            }
+        }
+
+        warehouseRepository.saveAll(products.values());
+        bookingRepository.save(OrderBooking.builder()
+                .orderId(orderId)
+                .products(productsForBooking)
+                .build());
+
+        return BookedProductsDto.builder()
+                .deliveryVolume(totalVolume)
+                .deliveryWeight(totalWeight)
+                .fragile(fragile)
+                .build();
     }
 }
